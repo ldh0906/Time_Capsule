@@ -4,62 +4,49 @@ package com.example.timecapsule
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.timecapsule.nav.Route
-import com.example.timecapsule.ui.theme.TimeCapsuleTheme
+import com.example.time_capsule.nav.Route
+import com.example.time_capsule.ui.theme.TimeCapsuleTheme
+import com.example.time_capsule.ui.screens.HomeScreen
+import com.example.time_capsule.ui.screens.ListScreen
+import com.example.time_capsule.ui.screens.WriteScreen
+import com.example.time_capsule.ui.screens.SettingsScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             TimeCapsuleTheme {
-                val navController = rememberNavController()
-                Surface(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    NavHost(
-                        navController = navController,
-                        startDestination = Route.Home
-                    ) {
-                        composable(Route.Home) {
-                            Box(
-                                modifier = Modifier.fillMaxSize().padding(16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text("TimeCapsule 프로젝트 세팅 완료")
+                val nav = rememberNavController()
+                NavHost(navController = nav, startDestination = Route.Home) {
+                    composable(Route.Home) {
+                        HomeScreen(
+                            onOpenList = { nav.navigate(Route.List) },
+                            onOpenWrite = { nav.navigate(Route.Write) },
+                            onOpenSettings = { nav.navigate(Route.Settings) }
+                        )
+                    }
+                    composable(Route.List) {
+                        ListScreen(
+                            onBack = { nav.popBackStack() },
+                            onOpenWrite = { nav.navigate(Route.Write) }
+                        )
+                    }
+                    composable(Route.Write) {
+                        WriteScreen(
+                            onSaved = { nav.popBackStack() },
+                            onCancel = {
+                                nav.navigate(Route.Home) {
+                                    popUpTo(Route.Home) { inclusive = false }
+                                    launchSingleTop = true
+                                }
                             }
-                        }
-                        composable(Route.List) {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text("List")
-                            }
-                        }
-                        composable(Route.Write) {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text("Write")
-                            }
-                        }
-                        composable(Route.Settings) {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text("Settings")
-                            }
-                        }
+                        )
+                    }
+                    composable(Route.Settings) {
+                        SettingsScreen(onBack = { nav.popBackStack() })
                     }
                 }
             }

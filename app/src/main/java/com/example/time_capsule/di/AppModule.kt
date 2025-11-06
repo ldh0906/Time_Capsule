@@ -1,14 +1,17 @@
-// di/AppModule.kt
-package com.example.timecapsule.di
+package com.example.time_capsule.di
 
 import android.content.Context
 import androidx.room.Room
-import com.example.timecapsule.data.AppDb
+import com.example.time_capsule.data.AppDb
 
 object AppModule {
-    fun db(ctx: Context) = Room.databaseBuilder(
-        ctx,
+    private var _db: AppDb? = null
+    fun db(ctx: Context) = _db ?: Room.databaseBuilder(
+        ctx.applicationContext,
         AppDb::class.java,
         "timecapsule.db"
-    ).build()
+    )
+        .fallbackToDestructiveMigration()
+        .build()
+        .also { _db = it }
 }

@@ -1,24 +1,24 @@
-package com.example.timecapsule.ui.theme
+package com.example.time_capsule.ui.theme
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-private val darkScheme = darkColorScheme(
-    primary = Main,
+private val DarkScheme = darkColorScheme(
+    primary = SurfaceMain,
     secondary = Accent,
     background = Bg,
-    surface = Main,
-    onPrimary = Color.White,
+    surface = SurfaceMain,
+    onPrimary = TextPrimary,
     onSecondary = Color(0xFF312E2D),
-    onBackground = Color.White,
-    onSurface = Color.White,
+    onBackground = TextPrimary,
+    onSurface = TextPrimary
 )
 
 @Composable
 fun TimeCapsuleTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = darkScheme,
+        colorScheme = DarkScheme,
         typography = Typography(),
         content = content
     )
