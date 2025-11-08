@@ -4,6 +4,7 @@ import android.os.SystemClock
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import com.example.timecapsule.nav.Route
+import kotlin.math.max
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -16,6 +17,7 @@ class NavigationLimiter(
     data class PendingNavigation(val route: String, val startedAt: Long, val token: Long)
 
     private var lastNavigateAt = 0L
+    private var stackDepth = 1
     private val _pendingNavigation = MutableStateFlow<PendingNavigation?>(null)
     val pendingNavigation: StateFlow<PendingNavigation?> = _pendingNavigation
 
@@ -32,11 +34,10 @@ class NavigationLimiter(
     }
 
     private fun enforceStackLimit() {
-        val entryCount = navController.backQueue.count { it.destination.route != null }
-        if (entryCount > maxStackDepth) {
-            navController.navigateSingleTop(Route.Home, inclusiveStart = true)
-            lastNavigateAt = currentTime()
-        }
+        if (stackDepth < maxStackDepth) return
+        navController.navigateSingleTop(Route.Home, inclusiveStart = true)
+        stackDepth = 1
+        lastNavigateAt = currentTime()
     }
 
     fun navigate(route: String, inclusiveStart: Boolean = false, force: Boolean = false) {
@@ -44,6 +45,7 @@ class NavigationLimiter(
         if (!force) enforceStackLimit()
         navController.navigateSingleTop(route, inclusiveStart)
         lastNavigateAt = currentTime()
+        stackDepth = if (inclusiveStart) 1 else stackDepth + 1
         _pendingNavigation.value = PendingNavigation(route, lastNavigateAt, lastNavigateAt)
     }
 
@@ -53,6 +55,7 @@ class NavigationLimiter(
         val popped = navController.popBackStack()
         if (popped) {
             lastNavigateAt = currentTime()
+            stackDepth = max(1, stackDepth - 1)
         }
         if (!force) enforceStackLimit()
         if (popped) {
