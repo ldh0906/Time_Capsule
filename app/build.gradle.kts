@@ -7,16 +7,20 @@ plugins {
 
 android {
     namespace = "com.example.timecapsule"
-    compileSdk = 34
+
+    // ⬇️ 최소 35 이상으로 올리세요 (가능하면 36)
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.timecapsule"
         minSdk = 24
-        targetSdk = 34
+
+        // ⬇️ 선택이지만 맞춰주면 깔끔함. 당장 부담되면 34 유지해도 됨.
+        targetSdk = 35
+
         versionCode = 1
         versionName = "0.1.0"
 
-        // Room에서 Java 8+ API 쓰기 위한 설정 (Compose도 문제 없음)
         vectorDrawables { useSupportLibrary = true }
     }
 
@@ -28,19 +32,15 @@ android {
                 "proguard-rules.pro"
             )
         }
-        debug {
-            // 필요 시 debug 전용 설정
-        }
+        debug { }
     }
 
     compileOptions {
-        // JDK 17 권장
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
     kotlinOptions {
         jvmTarget = "17"
-        // 코루틴 + Compose 빌드 안정성 향상
         freeCompilerArgs += listOf(
             "-Xjvm-default=all",
             "-Xcontext-receivers"
@@ -48,6 +48,12 @@ android {
     }
 
     buildFeatures { compose = true }
+
+    // compose plugin(alias(libs.plugins.kotlin.compose))를 쓰고 있으므로
+    // composeOptions는 생략해도 됩니다. 필요하면 아래 주석 해제하세요.
+    // composeOptions {
+    //     kotlinCompilerExtensionVersion = "1.5.15"
+    // }
 
     packaging {
         resources {
@@ -57,20 +63,24 @@ android {
 }
 
 dependencies {
-    // Compose BOM
+    // ✅ Compose BOM로 버전 정합성 맞추기
     implementation(platform("androidx.compose:compose-bom:2024.10.01"))
+
+    // Compose
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.animation:animation")
-    implementation(libs.androidx.compose.runtime)
     debugImplementation("androidx.compose.ui:ui-tooling")
     implementation("androidx.compose.material3:material3:1.3.0")
-    implementation("androidx.activity:activity-compose:1.9.2")
 
-    // Navigation-Compose
+    // Activity/Navigation
+    implementation("androidx.activity:activity-compose:1.9.2")
     implementation("androidx.navigation:navigation-compose:2.8.3")
 
-    // Lifecycle / ViewModel Compose
+    // ⚠️ core-ktx 1.15.0은 compileSdk 35+를 요구 → 위에서 compileSdk를 올렸으니 OK
+    implementation("androidx.core:core-ktx:1.15.0")
+
+    // Lifecycle
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.6")
 
@@ -79,6 +89,6 @@ dependencies {
     implementation("androidx.room:room-ktx:$room")
     kapt("androidx.room:room-compiler:$room")
 
-    // Kotlin coroutines (선택 — 최신 gradle 플러그인/compose는 내장된 경우도 많음)
+    // Coroutines
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
 }
