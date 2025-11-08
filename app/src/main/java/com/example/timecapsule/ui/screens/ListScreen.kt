@@ -1,4 +1,4 @@
-package com.example.time_capsule.ui.screens
+package com.example.timecapsule.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -34,11 +36,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.example.time_capsule.data.Message
-import com.example.time_capsule.data.MessageRepository
-import com.example.time_capsule.di.AppModule
-import com.example.time_capsule.ui.theme.SurfaceMain
-import com.example.time_capsule.ui.widgets.BottomBar
+import com.example.timecapsule.data.Message
+import com.example.timecapsule.data.MessageRepository
+import com.example.timecapsule.di.AppModule
+import com.example.timecapsule.ui.theme.Accent
+import com.example.timecapsule.ui.theme.SurfaceMain
+import com.example.timecapsule.ui.widgets.BottomBar
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -46,7 +49,9 @@ import java.util.Locale
 @Composable
 fun ListScreen(
     onBack: () -> Unit,
-    onOpenWrite: () -> Unit
+    onOpenWrite: () -> Unit,
+    onOpenEdit: (String) -> Unit,
+    onScreenReady: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val repository = remember { MessageRepository(AppModule.db(context).messageDao()) }
@@ -55,6 +60,7 @@ fun ListScreen(
     var messages by remember { mutableStateOf<List<Message>>(emptyList()) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var readySent by remember { mutableStateOf(false) }
 
     val fieldColors = OutlinedTextFieldDefaults.colors(
         focusedTextColor = MaterialTheme.colorScheme.onSurface,
@@ -85,6 +91,13 @@ fun ListScreen(
             isLoading = false
         }
         messages = result
+    }
+
+    LaunchedEffect(isLoading) {
+        if (!isLoading && !readySent) {
+            readySent = true
+            onScreenReady()
+        }
     }
 
     Scaffold(
@@ -179,7 +192,10 @@ fun ListScreen(
                         verticalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         items(messages, key = { it.id }) { message ->
-                            MessageCard(message = message)
+                            MessageCard(
+                                message = message,
+                                onEdit = { onOpenEdit(message.id) }
+                            )
                         }
                     }
                 }
@@ -189,7 +205,10 @@ fun ListScreen(
 }
 
 @Composable
-private fun MessageCard(message: Message) {
+private fun MessageCard(
+    message: Message,
+    onEdit: () -> Unit
+) {
     val formatter = remember {
         SimpleDateFormat("yyyy.MM.dd HH:mm", Locale.getDefault())
     }
@@ -217,5 +236,19 @@ private fun MessageCard(message: Message) {
             text = createdAtText,
             style = MaterialTheme.typography.bodySmall
         )
+        Box(
+            modifier = Modifier.fillMaxWidth(),
+            contentAlignment = Alignment.CenterEnd
+        ) {
+            Button(
+                onClick = onEdit,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Accent,
+                    contentColor = MaterialTheme.colorScheme.onSecondary
+                )
+            ) {
+                Text("편집")
+            }
+        }
     }
 }

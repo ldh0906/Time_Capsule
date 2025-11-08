@@ -1,9 +1,9 @@
-package com.example.time_capsule.ui
+package com.example.timecapsule.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.time_capsule.data.Message
-import com.example.time_capsule.data.MessageRepository
+import com.example.timecapsule.data.Message
+import com.example.timecapsule.data.MessageRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update

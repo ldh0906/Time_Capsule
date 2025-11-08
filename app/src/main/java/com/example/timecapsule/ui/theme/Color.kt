@@ -1,4 +1,4 @@
-package com.example.time_capsule.ui.theme
+package com.example.timecapsule.ui.theme
 
 import androidx.compose.ui.graphics.Color
 

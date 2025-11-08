@@ -1,8 +1,8 @@
-package com.example.time_capsule.di
+package com.example.timecapsule.di
 
 import android.content.Context
 import androidx.room.Room
-import com.example.time_capsule.data.AppDb
+import com.example.timecapsule.data.AppDb
 
 object AppModule {
     private var _db: AppDb? = null

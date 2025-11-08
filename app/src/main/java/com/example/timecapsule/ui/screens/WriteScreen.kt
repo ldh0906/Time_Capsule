@@ -1,5 +1,6 @@
-package com.example.time_capsule.ui.screens
+package com.example.timecapsule.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +20,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,9 +35,9 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
-import com.example.time_capsule.data.MessageRepository
-import com.example.time_capsule.di.AppModule
-import com.example.time_capsule.ui.theme.Accent
+import com.example.timecapsule.data.MessageRepository
+import com.example.timecapsule.di.AppModule
+import com.example.timecapsule.ui.theme.Accent
 import kotlinx.coroutines.launch
 
 private const val MAX_TITLE_LENGTH = 60
@@ -45,7 +47,8 @@ private const val MAX_BODY_LENGTH = 2000
 @Composable
 fun WriteScreen(
     onSaved: () -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
+    onReady: () -> Unit = {}
 ) {
     val context = LocalContext.current
     // Room DB 기반 저장소를 한 번만 생성해 사용한다.
@@ -56,6 +59,8 @@ fun WriteScreen(
     var text by rememberSaveable { mutableStateOf("") }
     var isSaving by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(Unit) { onReady() }
 
     // 다크 테마에서도 잘 보이도록 입력 필드 컬러를 직접 지정한다.
     val fieldColors = OutlinedTextFieldDefaults.colors(
@@ -93,20 +98,25 @@ fun WriteScreen(
         }
     }
 
+    fun handleCancel() {
+        if (isSaving) return
+        text = ""
+        title = ""
+        errorMessage = null
+        onCancel()
+    }
+
+    BackHandler(enabled = !isSaving) {
+        handleCancel()
+    }
+
     Scaffold(topBar = {
         CenterAlignedTopAppBar(
             title = { Text("캡슐 작성") },
             navigationIcon = {
                 // 저장 중이 아니면 입력값을 비우고 취소 콜백을 호출한다.
                 TextButton(
-                    onClick = {
-                        if (!isSaving) {
-                            text = ""
-                            title = ""
-                            errorMessage = null
-                            onCancel()
-                        }
-                    },
+                    onClick = { handleCancel() },
                     enabled = !isSaving
                 ) {
                     Text(
