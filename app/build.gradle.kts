@@ -62,6 +62,13 @@ android {
     }
 }
 
+kapt {
+    arguments {
+        arg("room.schemaLocation", "$projectDir/schemas")
+        arg("room.incremental", "true")
+    }
+}
+
 dependencies {
     // ✅ Compose BOM로 버전 정합성 맞추기
     implementation(platform("androidx.compose:compose-bom:2024.10.01"))
